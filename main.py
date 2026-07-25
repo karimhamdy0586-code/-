@@ -1,4 +1,12 @@
+import arabic_reshaper
+from bidi.algorithm import get_display
 
+def ar(text):
+    reshaped = arabic_reshaper.reshape(text)
+    return get_display(reshaped)
+
+# واستخدمه كده في أي Label:
+# Label(text=ar("مركز الزهراء"), font_name="Amiri-Regular.ttf")
 import json, os, base64
 from datetime import datetime
 from kivy.app import App
