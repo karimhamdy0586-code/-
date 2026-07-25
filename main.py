@@ -10,21 +10,20 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.metrics import dp
 
-# محاولة اصلاح العربي
+# --- حل مشكلة العربي ---
 try:
     import arabic_reshaper
     from bidi.algorithm import get_display
-    def ar(t):
-        if not t: return ""
+    def ar(text):
         try:
-            return get_display(arabic_reshaper.reshape(str(t)))
+            return get_display(arabic_reshaper.reshape(text))
         except:
-            return str(t)
+            return text
 except:
-    def ar(t): return str(t)
+    def ar(text):
+        return text
 
 DATA_FILE = 'zahraa_data.json'
-
 GROUPS = [
 "اول اعدادي سبت ثلاثاء 2ظ بداية 8",
 "اول اعدادي احد اربعاء 2ظ بداية 8",
@@ -42,16 +41,21 @@ GROUPS = [
 ]
 
 def load_data():
-    if not os.path.exists(DATA_FILE): return {"students":[],"expenses":[],"payments":[],"attendance":[]}
+    if not os.path.exists(DATA_FILE): 
+        return {"students":[],"expenses":[],"payments":[],"attendance":[]}
     try:
-        with open(DATA_FILE,'r',encoding='utf-8') as f: return json.load(f)
-    except: return {"students":[],"expenses":[],"payments":[],"attendance":[]}
+        with open(DATA_FILE,'r',encoding='utf-8') as f: 
+            return json.load(f)
+    except: 
+        return {"students":[],"expenses":[],"payments":[],"attendance":[]}
 
 def save_data(d):
-    with open(DATA_FILE,'w',encoding='utf-8') as f: json.dump(d,f,ensure_ascii=False,indent=2)
+    with open(DATA_FILE,'w',encoding='utf-8') as f: 
+        json.dump(d,f,ensure_ascii=False,indent=2)
 
 class HomeScreen(Screen):
-    def on_enter(self): self.refresh()
+    def on_enter(self):
+        self.refresh()
     def refresh(self):
         self.clear_widgets()
         data = load_data()
@@ -65,16 +69,18 @@ class HomeScreen(Screen):
         today_att = len([a for a in data.get('attendance',[]) if a.get('date')==today])
 
         root = BoxLayout(orientation='vertical', padding=dp(12), spacing=dp(10))
-        root.add_widget(Label(text=ar('سنتر الزهراء فاطمة - Realme C55'), size_hint_y=None, height=dp(50), bold=True, font_size='18sp', color=(0.83,0.68,0.21,1)))
-
+        root.add_widget(Label(text=ar('سنتر الزهراء فاطمة\nمركز تعليمي'), markup=True, size_hint_y=None, height=dp(60), font_size='18sp'))
+        
         kpi = GridLayout(cols=2, spacing=dp(10), size_hint_y=None, height=dp(160))
-        kpi.add_widget(Label(text=ar(f"الطلاب\n{len(students)}")))
-        kpi.add_widget(Label(text=ar(f"المجموعات\n{len(GROUPS)}")))
-        kpi.add_widget(Label(text=ar(f"حضور اليوم\n{today_att}")))
-        kpi.add_widget(Label(text=ar(f"صافي الربح\n{net} جنيه"), color=(0.83,0.68,0.21,1)))
+        kpi.add_widget(Label(text=ar(f'الطلاب\n{len(students)}')))
+        kpi.add_widget(Label(text=ar(f'المجموعات\n{len(GROUPS)}')))
+        kpi.add_widget(Label(text=ar(f'حضور اليوم\n{today_att}')))
+        kpi.add_widget(Label(text=ar(f'صافي الربح\n{net} جنيه')))
         root.add_widget(kpi)
 
-        root.add_widget(Label(text=ar(f"المدفوعات: {total_in} | المصروفات: {total_out}"), size_hint_y=None, height=dp(30), font_size='13sp'))
+        fin = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(60))
+        fin.add_widget(Label(text=ar(f'المدفوعات: {total_in} | المصروفات: {total_out}'), font_size='12sp'))
+        root.add_widget(fin)
 
         btns = BoxLayout(spacing=dp(10), size_hint_y=None, height=dp(50))
         btns.add_widget(Button(text=ar('إضافة طالب'), background_color=(0.83,0.68,0.21,1), on_press=lambda x: setattr(self.manager,'current','add_student')))
@@ -86,5 +92,5 @@ class HomeScreen(Screen):
         root.add_widget(self.search)
 
         scroll = ScrollView()
-        self.list_layout = GridLayout(cols=1, spacing=dp(6), size_hint_y=None)
+        self.list_layout = GridLayout(cols=1, spacing=dp(6), size_hint_y=None, padding=dp(5))
         self.list
